@@ -142,7 +142,7 @@ func (g *GeneratedProject) NewVersion() (*Project, *Version, *task.Task, *projec
 
 	// Validate generated project against original project.
 	if err = g.validateGeneratedProject(p, cachedProject); err != nil {
-		return nil, nil, nil, nil,
+		return nil, v, nil, nil,
 			gimlet.ErrorResponse{StatusCode: http.StatusBadRequest, Message: errors.Wrap(err, "generated project is invalid").Error()}
 	}
 
