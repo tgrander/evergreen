@@ -527,6 +527,47 @@ const (
 	LogsNone             LogsPermission             = 0
 )
 
+func MapPermissionKeyToName(permissionKey string) string {
+	switch permissionKey {
+	case PermissionProjectSettings:
+		return "Settings"
+	case PermissionTasks:
+		return "Tasks"
+	case PermissionPatches:
+		return "Patches"
+	case PermissionLogs:
+		return "Logs"
+	}
+	return ""
+}
+func MapPermissionKeyToPermissions(permissionKey string) []PermissionLevel {
+	switch permissionKey {
+	case PermissionProjectSettings:
+		return []PermissionLevel{
+			ProjectSettingsEdit,
+			ProjectSettingsView,
+			ProjectSettingsNone,
+		}
+	case PermissionTasks:
+		return []PermissionLevel{
+			TasksAdmin,
+			TasksBasic,
+			TasksView,
+			TasksNone,
+		}
+	case PermissionPatches:
+		return []PermissionLevel{
+			PatchSubmit,
+			PatchNone,
+		}
+	case PermissionLogs:
+		return []PermissionLevel{
+			LogsView,
+			LogsNone,
+		}
+	}
+	return []PermissionLevel{}
+}
 func (p ProjectSettingsPermission) String() string {
 	switch p {
 	case ProjectSettingsEdit:
@@ -596,7 +637,7 @@ func (p LogsPermission) Value() int {
 	return int(p)
 }
 
-var projectPermissions = []string{
+var ProjectPermissions = []string{
 	PermissionProjectSettings,
 	PermissionProjectVariables,
 	PermissionTasks,
