@@ -2489,11 +2489,6 @@ func GetHostByIdWithTask(hostID string) (*Host, error) {
 	ctx, cancel := env.Context()
 	defer cancel()
 
-	// host, err := FindOne(db.Query(query))
-	// if err != nil {
-	// 	return nil, errors.Wrapf(err, "error finding '%s' by _id or tag field", hostID)
-	// }
-
 	hosts := []Host{}
 
 	cursor, err := env.DB().Collection(Collection).Aggregate(ctx, pipeline)

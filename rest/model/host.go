@@ -126,11 +126,11 @@ func (apiHost *APIHost) BuildFromHostStruct(h interface{}, graphQL bool) error {
 		Id:       ToStringPtr(v.Distro.Id),
 		Provider: ToStringPtr(v.Distro.Provider),
 	}
-	// imageID, err := v.Distro.GetImageID()
-	// if err != nil {
-	// 	errors.Wrap(err, "problem getting image ID")
-	// }
-	// di.ImageId = ToStringPtr(imageID)
+	imageID, err := v.Distro.GetImageID()
+	if err != nil {
+		errors.Wrap(err, "problem getting image ID")
+	}
+	di.ImageId = ToStringPtr(imageID)
 	apiHost.Distro = di
 	return nil
 }
