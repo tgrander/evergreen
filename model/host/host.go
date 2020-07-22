@@ -15,7 +15,6 @@ import (
 	"github.com/evergreen-ci/evergreen/model/event"
 	"github.com/evergreen-ci/evergreen/model/task"
 	"github.com/evergreen-ci/utility"
-	"github.com/k0kubun/pp"
 	"github.com/mongodb/anser/bsonutil"
 	adb "github.com/mongodb/anser/db"
 	"github.com/mongodb/grip"
@@ -2484,7 +2483,6 @@ func GetHostByIdWithTask(hostID string) (*Host, error) {
 		},
 	}
 
-	// CONTEXT
 	env := evergreen.GetEnvironment()
 	ctx, cancel := env.Context()
 	defer cancel()
@@ -2499,9 +2497,6 @@ func GetHostByIdWithTask(hostID string) (*Host, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("HOSTYYY")
-	pp.Print(hosts[0])
 
 	return &hosts[0], nil
 }
