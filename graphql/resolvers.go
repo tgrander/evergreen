@@ -24,6 +24,7 @@ import (
 	"github.com/evergreen-ci/evergreen/rest/route"
 	"github.com/evergreen-ci/gimlet"
 	"github.com/evergreen-ci/utility"
+	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gopkg.in/mgo.v2/bson"
@@ -987,30 +988,27 @@ func (r *queryResolver) SiteBanner(ctx context.Context) (*restModel.APIBanner, e
 }
 
 func (r *queryResolver) Host(ctx context.Context, hostID string) (*restModel.APIHost, error) {
-	host, err := host.FindOneByIdOrTag(hostID)
+	host, err := host.GetHostByIdWithTask(hostID)
+	pp.Print(host)
+
 	if err != nil {
 		return nil, InternalServerError.Send(ctx, fmt.Sprintf("Error Fetching host: %s", err.Error()))
 	}
-
 	if host == nil {
 		return nil, ResourceNotFound.Send(ctx, fmt.Sprintf("cannot find host with id %s: %s", hostID, err.Error()))
 	}
 
 	apiHost := &restModel.APIHost{}
 
-	err = apiHost.BuildFromHostStruct(host, true)
+	err = apiHost.BuildFromService(host)
 	if err != nil {
 		return nil, InternalServerError.Send(ctx, fmt.Sprintf("Error converting from host.Host to model.APIHost: %s", err.Error()))
 	}
 
 	if host.RunningTask != "" {
-		task, err := r.sc.FindTaskById(host.RunningTask)
-	if err != nil {
-		return nil, ResourceNotFound.Send(ctx, fmt.Sprintf("error finding task by id %s: %s", host.RunningTask, err.Error()))
-	}
 		// Add the task information to the host document.
-		if err = apiHost.BuildFromService(task); err != nil {
-			return nil, InternalServerError.Send(ctx, fmt.Sprintf("Error converting from host.Host to model.APIHost: %s", err.Error()))
+		if err = apiHost.BuildFromService(host.RunningTaskFull); err != nil {
+			return nil, InternalServerError.Send(ctx, fmt.Sprintf("Error converting host's running task: %s", err.Error()))
 		}
 	}
 

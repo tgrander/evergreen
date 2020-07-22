@@ -15,6 +15,7 @@ import (
 	"github.com/evergreen-ci/evergreen/model/event"
 	"github.com/evergreen-ci/evergreen/model/task"
 	"github.com/evergreen-ci/utility"
+	"github.com/k0kubun/pp"
 	"github.com/mongodb/anser/bsonutil"
 	adb "github.com/mongodb/anser/db"
 	"github.com/mongodb/grip"
@@ -2460,6 +2461,54 @@ func (h *Host) IsSubjectToHostCreationThrottle() bool {
 	}
 
 	return true
+}
+
+func GetHostByIdWithTask(hostID string) (*Host, error) {
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{IdKey: hostID},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         task.Collection,
+				"localField":   RunningTaskKey,
+				"foreignField": task.IdKey,
+				"as":           "task_full",
+			},
+		},
+		{
+			"$unwind": bson.M{
+				"path":                       "$task_full",
+				"preserveNullAndEmptyArrays": true,
+			},
+		},
+	}
+
+	// CONTEXT
+	env := evergreen.GetEnvironment()
+	ctx, cancel := env.Context()
+	defer cancel()
+
+	// host, err := FindOne(db.Query(query))
+	// if err != nil {
+	// 	return nil, errors.Wrapf(err, "error finding '%s' by _id or tag field", hostID)
+	// }
+
+	hosts := []Host{}
+
+	cursor, err := env.DB().Collection(Collection).Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(ctx, &hosts)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("HOSTYYY")
+	pp.Print(hosts[0])
+
+	return &hosts[0], nil
 }
 
 func GetPaginatedRunningHosts(hostID, distroID, currentTaskID string, statuses []string, startedBy string, sortBy string, sortDir, page, limit int) ([]Host, *int, int, error) {
